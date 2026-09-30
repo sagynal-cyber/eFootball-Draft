@@ -20,7 +20,6 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* БРЕНДИНГ MASTERFOOT */
         .brand-badge {
             background: rgba(0, 255, 136, 0.1);
             color: #00ff88;
@@ -103,7 +102,6 @@
         .stat-title { font-size: 10px; color: #8b949e; text-transform: uppercase; }
         .stat-value { font-size: 20px; font-weight: bold; color: #00ff88; }
 
-        /* ПОЛЕ */
         .pitch {
             background: linear-gradient(180deg, #1e4d2b 0%, #14361e 100%);
             border: 2px solid #2ea043;
@@ -214,7 +212,7 @@
 </head>
 <body>
 
-    <!-- 1. ЭКРАН: ГЛАВНОЕ МЕНЮ -->
+    <!-- 1. ГЛАВНОЕ МЕНЮ -->
     <div id="screen-home" class="screen active">
         <div class="home-card">
             <div class="brand-badge">OFFICIAL GAME APP</div>
@@ -228,7 +226,7 @@
         </div>
     </div>
 
-    <!-- 2. ЭКРАН: ВЫБОР СХЕМЫ -->
+    <!-- 2. ВЫБОР СХЕМЫ -->
     <div id="screen-formation" class="screen">
         <h2 style="color:#00ff88;">Выбери схему</h2>
         <p class="subtitle">Тактика определит позиции на поле</p>
@@ -239,7 +237,7 @@
         </div>
     </div>
 
-    <!-- 3. ЭКРАН: СБОРКА ДРАФТА -->
+    <!-- 3. ЭКРАН СБОРКИ -->
     <div id="screen-draft" class="screen">
         <div class="header-stats">
             <div class="stat-box">
@@ -277,13 +275,14 @@
             window.Telegram.WebApp.expand();
         }
 
-        // РАСШИРЕННАЯ БАЗА ИГРОКОВ С ТОЧНЫМИ ПОЗИЦИЯМИ
+        // БАЗА ДАННЫХ
         const database = [
             // GK
             { id: 1, name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
             { id: 2, name: "M. Neuer", ovr: 96, pos: "GK", type: "Highlight", club: "Bayern" },
             { id: 3, name: "G. Donnarumma", ovr: 94, pos: "GK", type: "Standard", club: "PSG" },
             { id: 4, name: "T. Courtois", ovr: 95, pos: "GK", type: "Standard", club: "Real Madrid" },
+            { id: 5, name: "I. Casillas", ovr: 98, pos: "GK", type: "Epic", club: "Real Madrid" },
 
             // CB
             { id: 10, name: "P. Maldini", ovr: 100, pos: "CB", type: "Epic", club: "AC Milan" },
@@ -291,48 +290,75 @@
             { id: 12, name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
             { id: 14, name: "F. Cannavaro", ovr: 98, pos: "CB", type: "Epic", club: "Italy" },
+            { id: 15, name: "E. Militao", ovr: 94, pos: "CB", type: "Standard", club: "Real Madrid" },
+            { id: 16, name: "A. Rüdiger", ovr: 95, pos: "CB", type: "Highlight", club: "Real Madrid" },
 
-            // LB / RB
+            // LB
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
             { id: 22, name: "A. Robertson", ovr: 93, pos: "LB", type: "Standard", club: "Liverpool" },
+            { id: 23, name: "A. Davies", ovr: 95, pos: "LB", type: "Highlight", club: "Bayern" },
 
+            // RB
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
             { id: 32, name: "J. Koundé", ovr: 94, pos: "RB", type: "Highlight", club: "Barcelona" },
+            { id: 33, name: "Trent A-A", ovr: 95, pos: "RB", type: "Highlight", club: "Liverpool" },
 
-            // DMF / CMF
+            // DMF
             { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
             { id: 51, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
             { id: 52, name: "Casemiro", ovr: 94, pos: "DMF", type: "Standard", club: "Man Utd" },
+            { id: 53, name: "F. Rijkaard", ovr: 98, pos: "DMF", type: "Epic", club: "AC Milan" },
 
-            { id: 53, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-            { id: 54, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
-            { id: 55, name: "F. Valverde", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            // CMF
+            { id: 54, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            { id: 55, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
+            { id: 56, name: "F. Valverde", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            { id: 57, name: "Xavi", ovr: 97, pos: "CMF", type: "Epic", club: "Barcelona" },
+            { id: 58, name: "Iniesta", ovr: 98, pos: "CMF", type: "Epic", club: "Barcelona" },
 
             // AMF
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
             { id: 42, name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
+            { id: 44, name: "D. Maradona", ovr: 101, pos: "AMF", type: "Epic", club: "Argentina" },
 
-            // LWF / RWF
+            // LWF
             { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
             { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
             { id: 72, name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
+            { id: 73, name: "Neymar Jr", ovr: 99, pos: "LWF", type: "Epic", club: "Santos" },
 
+            // RWF
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
             { id: 61, name: "M. Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
             { id: 62, name: "L. Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
+            { id: 63, name: "L. Figo", ovr: 97, pos: "RWF", type: "Epic", club: "Real Madrid" },
 
             // CF
             { id: 80, name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
             { id: 81, name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
             { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
-            { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" }
+            { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" },
+            { id: 84, name: "R. Lewandowski", ovr: 96, pos: "CF", type: "Standard", club: "Barcelona" }
         ];
 
-        // ТАКТИЧЕСКИЕ СХЕМЫ С ЧЁТКИМИ РОЛЯМИ
+        // КАРТА РОДСТВЕННЫХ ПОЗИЦИЙ (ЕСЛИ ТОЧНЫЕ ИГРОКИ ЗАКОНЧИЛИСЬ)
+        const positionGroups = {
+            'GK': ['GK'],
+            'CB': ['CB', 'LB', 'RB'],
+            'LB': ['LB', 'CB', 'LMF'],
+            'RB': ['RB', 'CB', 'RMF'],
+            'DMF': ['DMF', 'CMF'],
+            'CMF': ['CMF', 'DMF', 'AMF'],
+            'AMF': ['AMF', 'CMF', 'SS'],
+            'LWF': ['LWF', 'RWF', 'CF', 'LMF'],
+            'RWF': ['RWF', 'LWF', 'CF', 'RMF'],
+            'CF': ['CF', 'SS', 'LWF', 'RWF']
+        };
+
         const formations = {
             '4-3-3': [
                 { id: 'pos-1', pos: 'GK', top: '88%', left: '50%' },
@@ -425,13 +451,13 @@
             const chosenIds = Object.values(squad).map(p => p.id);
             let available = database.filter(p => !chosenIds.includes(p.id));
 
-            // Точный фильтр по позиции
+            // 1. Пытаемся найти ровно по нужной позиции
             let pool = available.filter(p => p.pos === targetPos);
 
-            // Резервный выбор, если подходящих позиций осталось меньше 5
+            // 2. Если мало, подключаем родственные позиции (защитники к защитникам, хавы к хавам)
             if (pool.length < 5) {
-                let extra = available.filter(p => p.pos !== targetPos);
-                pool = pool.concat(extra);
+                const allowedPositions = positionGroups[targetPos] || [targetPos];
+                pool = available.filter(p => allowedPositions.includes(p.pos));
             }
 
             const shuffled = [...pool].sort(() => 0.5 - Math.random());
