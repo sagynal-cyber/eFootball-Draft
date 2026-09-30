@@ -61,13 +61,31 @@
         }
         .main-btn:active { transform: scale(0.98); }
 
+        .donate-btn {
+            background: linear-gradient(90deg, #ffaa00 0%, #ff8800 100%);
+            color: #000;
+            border: none;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         .channel-link-btn {
             background: #21262d;
             color: #58a6ff;
             border: 1px solid #30363d;
             padding: 12px;
             border-radius: 10px;
-            margin-top: 12px;
+            margin-top: 10px;
             width: 100%;
             font-size: 13px;
             font-weight: bold;
@@ -159,7 +177,6 @@
         .slot.filled.Standard { border-color: #388bfd; }
 
         .slot-pos { font-size: 10px; font-weight: bold; color: #8b949e; }
-        .slot-add { font-size: 16px; color: #00ff88; }
         .slot-name { font-size: 9px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; padding: 0 2px; }
         .slot-ovr { font-size: 11px; font-weight: bold; color: #ffcc00; }
 
@@ -176,7 +193,7 @@
         .modal-content {
             background: #161b22;
             border-radius: 16px;
-            padding: 15px;
+            padding: 18px;
             width: 100%;
             max-width: 380px;
             border: 1px solid #30363d;
@@ -188,7 +205,7 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .modal-title { font-size: 16px; text-align: center; margin-bottom: 12px; color: #00ff88; }
+        .modal-title { font-size: 18px; text-align: center; margin-bottom: 10px; color: #ffcc00; font-weight: bold; }
         .card-list { display: flex; flex-direction: column; gap: 8px; }
         
         .pick-card {
@@ -210,6 +227,22 @@
         .p-details { font-size: 10px; color: #8b949e; }
         .p-ovr { font-size: 17px; font-weight: bold; color: #ffcc00; }
 
+        /* ДОНАТ СТАТИСТИКА И ОПЦИИ */
+        .donate-option {
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .donate-option:hover { border-color: #ffcc00; }
+        .donate-amount { font-size: 16px; font-weight: bold; color: #ffcc00; }
+
         .reset-btn {
             background: #21262d;
             color: #f85149;
@@ -222,7 +255,6 @@
             cursor: pointer;
         }
 
-        /* ФИНАЛЬНЫЙ ЭКРАН И МАТЧ */
         .result-card {
             background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
             border: 2px solid #00ff88;
@@ -280,7 +312,6 @@
             box-shadow: 0 4px 15px rgba(248, 81, 73, 0.3);
         }
 
-        /* ЭКРАН СИМУЛЯЦИИ */
         .match-header {
             display: flex;
             justify-content: space-between;
@@ -333,6 +364,7 @@
             <div class="subtitle">Собери свой сильнейший состав!</div>
             
             <button class="main-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">НАЧАТЬ ДРАФТ</button>
+            <button class="donate-btn" onclick="openDonateModal()">⭐ Поддержать автора</button>
             <button class="channel-link-btn" onclick="openChannel()">📢 Наш Telegram Канал</button>
         </div>
     </div>
@@ -401,6 +433,7 @@
 
             <button class="match-btn" onclick="startMatchSimulation()">⚔️ Сыграть матч состава</button>
             <button class="share-btn" onclick="shareResult()">🚀 Поделиться результатом</button>
+            <button class="donate-btn" style="margin-bottom:10px;" onclick="openDonateModal()">⭐ Поддержать проект</button>
             <button class="reset-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">Собрать новый драфт</button>
         </div>
     </div>
@@ -428,8 +461,44 @@
     <!-- МОДАЛКА ВЫБОРА ИГРОКА -->
     <div class="modal" id="picker-modal">
         <div class="modal-content">
-            <div class="modal-title" id="modal-heading">Выбери игрока</div>
+            <div class="modal-title" id="modal-heading" style="color:#00ff88;">Выбери игрока</div>
             <div class="card-list" id="card-options"></div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ДОНАТА / ПОДДЕРЖКИ -->
+    <div class="modal" id="donate-modal">
+        <div class="modal-content">
+            <div class="modal-title">⭐ Поддержка MasterFoot</div>
+            <p style="font-size:12px; color:#8b949e; margin-bottom:15px;">
+                Нравится игра? Поддержи автора для создания новых режимов и обновления базы игроков!
+            </p>
+
+            <div class="donate-option" onclick="processDonate(50)">
+                <div style="text-align:left;">
+                    <div style="font-weight:bold; font-size:14px;">Чашка кофе ☕</div>
+                    <div style="font-size:10px; color:#8b949e;">Сказать спасибо за проект</div>
+                </div>
+                <div class="donate-amount">50 ⭐</div>
+            </div>
+
+            <div class="donate-option" onclick="processDonate(100)">
+                <div style="text-align:left;">
+                    <div style="font-weight:bold; font-size:14px;">Золотой буст 🏆</div>
+                    <div style="font-size:10px; color:#8b949e;">Вклад в новые фичи</div>
+                </div>
+                <div class="donate-amount">100 ⭐</div>
+            </div>
+
+            <div class="donate-option" onclick="processDonate(250)">
+                <div style="text-align:left;">
+                    <div style="font-weight:bold; font-size:14px;">Спонсор проекта 👑</div>
+                    <div style="font-size:10px; color:#8b949e;">Максимальная поддержка</div>
+                </div>
+                <div class="donate-amount">250 ⭐</div>
+            </div>
+
+            <button class="reset-btn" onclick="closeDonateModal()">Закрыть</button>
         </div>
     </div>
 
@@ -445,27 +514,20 @@
         }
 
         const database = [
-            // GK
             { id: 1, name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
             { id: 2, name: "M. Neuer", ovr: 96, pos: "GK", type: "Highlight", club: "Bayern" },
             { id: 3, name: "G. Donnarumma", ovr: 94, pos: "GK", type: "Standard", club: "PSG" },
             { id: 4, name: "T. Courtois", ovr: 95, pos: "GK", type: "Standard", club: "Real Madrid" },
             { id: 5, name: "I. Casillas", ovr: 98, pos: "GK", type: "Epic", club: "Real Madrid" },
-
-            // CB
             { id: 10, name: "P. Maldini", ovr: 100, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 11, name: "V. van Dijk", ovr: 97, pos: "CB", type: "Highlight", club: "Liverpool" },
             { id: 12, name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
             { id: 14, name: "F. Cannavaro", ovr: 98, pos: "CB", type: "Epic", club: "Italy" },
-
-            // LB/RB
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
-
-            // DMF/CMF/AMF
             { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
             { id: 51, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
             { id: 54, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
@@ -473,8 +535,6 @@
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
-
-            // LWF/RWF/CF
             { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
             { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
@@ -561,6 +621,28 @@
             else { window.open('https://t.me/masterfoot1', '_blank'); }
         }
 
+        function openDonateModal() {
+            triggerHaptic('medium');
+            document.getElementById('donate-modal').style.display = 'flex';
+        }
+
+        function closeDonateModal() {
+            triggerHaptic('light');
+            document.getElementById('donate-modal').style.display = 'none';
+        }
+
+        function processDonate(stars) {
+            triggerHaptic('success');
+            // Переход в ЛС или к боту/каналу для отправки Telegram Stars
+            const link = `https://t.me/masterfoot1`;
+            if (tg) {
+                tg.openTelegramLink(link);
+            } else {
+                window.open(link, '_blank');
+            }
+            closeDonateModal();
+        }
+
         function startDraft(formationKey) {
             triggerHaptic('medium');
             currentFormation = formationKey;
@@ -582,7 +664,7 @@
                 slot.style.top = item.top;
                 slot.style.left = item.left;
                 slot.onclick = () => openPicker(item.id, item.pos);
-                slot.innerHTML = `<span class="slot-pos">${item.pos}</span><span class="slot-add">+</span>`;
+                slot.innerHTML = `<span class="slot-pos">${item.pos}</span><span class="slot-add" style="color:#00ff88; font-size:16px;">+</span>`;
                 pitch.appendChild(slot);
             });
 
@@ -709,7 +791,6 @@
                     const item = document.createElement('div');
                     item.className = 'log-item';
                     
-                    // Шанс гола зависит от силы команды
                     const goalChance = Math.random();
                     if (goalChance > 0.65) {
                         if (myOvr >= opp.ovr || Math.random() > 0.4) {
