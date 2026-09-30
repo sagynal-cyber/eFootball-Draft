@@ -103,7 +103,7 @@
         .stat-title { font-size: 10px; color: #8b949e; text-transform: uppercase; }
         .stat-value { font-size: 20px; font-weight: bold; color: #00ff88; }
 
-        /* ПОЛЕ С ВОДНЫМ ЗНАКОМ MASTERFOOT */
+        /* ПОЛЕ */
         .pitch {
             background: linear-gradient(180deg, #1e4d2b 0%, #14361e 100%);
             border: 2px solid #2ea043;
@@ -277,80 +277,101 @@
             window.Telegram.WebApp.expand();
         }
 
+        // РАСШИРЕННАЯ БАЗА ИГРОКОВ С ТОЧНЫМИ ПОЗИЦИЯМИ
         const database = [
+            // GK
             { id: 1, name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
             { id: 2, name: "M. Neuer", ovr: 96, pos: "GK", type: "Highlight", club: "Bayern" },
             { id: 3, name: "G. Donnarumma", ovr: 94, pos: "GK", type: "Standard", club: "PSG" },
             { id: 4, name: "T. Courtois", ovr: 95, pos: "GK", type: "Standard", club: "Real Madrid" },
 
+            // CB
             { id: 10, name: "P. Maldini", ovr: 100, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 11, name: "V. van Dijk", ovr: 97, pos: "CB", type: "Highlight", club: "Liverpool" },
             { id: 12, name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
+            { id: 14, name: "F. Cannavaro", ovr: 98, pos: "CB", type: "Epic", club: "Italy" },
 
+            // LB / RB
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
+            { id: 22, name: "A. Robertson", ovr: 93, pos: "LB", type: "Standard", club: "Liverpool" },
+
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
+            { id: 32, name: "J. Koundé", ovr: 94, pos: "RB", type: "Highlight", club: "Barcelona" },
 
+            // DMF / CMF
+            { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
+            { id: 51, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
+            { id: 52, name: "Casemiro", ovr: 94, pos: "DMF", type: "Standard", club: "Man Utd" },
+
+            { id: 53, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            { id: 54, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
+            { id: 55, name: "F. Valverde", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+
+            // AMF
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
             { id: 42, name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
 
-            { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
-            { id: 51, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-            { id: 52, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
-            { id: 54, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
+            // LWF / RWF
+            { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
+            { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
+            { id: 72, name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
 
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
             { id: 61, name: "M. Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
-            { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
-            { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
+            { id: 62, name: "L. Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
+
+            // CF
             { id: 80, name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
             { id: 81, name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
-            { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" }
+            { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
+            { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" }
         ];
 
+        // ТАКТИЧЕСКИЕ СХЕМЫ С ЧЁТКИМИ РОЛЯМИ
         const formations = {
             '4-3-3': [
-                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
-                { id: 'pos-LB', pos: 'LB', top: '72%', left: '18%' },
-                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '39%' },
-                { id: 'pos-CB2', pos: 'CB', top: '74%', left: '61%' },
-                { id: 'pos-RB', pos: 'RB', top: '72%', left: '82%' },
-                { id: 'pos-CM1', pos: 'CMF', top: '50%', left: '28%' },
-                { id: 'pos-AMF', pos: 'AMF', top: '45%', left: '50%' },
-                { id: 'pos-CM2', pos: 'CMF', top: '50%', left: '72%' },
-                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '20%' },
-                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
-                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '80%' }
+                { id: 'pos-1', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-2', pos: 'LB', top: '72%', left: '18%' },
+                { id: 'pos-3', pos: 'CB', top: '74%', left: '39%' },
+                { id: 'pos-4', pos: 'CB', top: '74%', left: '61%' },
+                { id: 'pos-5', pos: 'RB', top: '72%', left: '82%' },
+                { id: 'pos-6', pos: 'CMF', top: '50%', left: '28%' },
+                { id: 'pos-7', pos: 'AMF', top: '45%', left: '50%' },
+                { id: 'pos-8', pos: 'CMF', top: '50%', left: '72%' },
+                { id: 'pos-9', pos: 'LWF', top: '22%', left: '20%' },
+                { id: 'pos-10', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-11', pos: 'RWF', top: '22%', left: '80%' }
             ],
             '4-2-1-3': [
-                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
-                { id: 'pos-LB', pos: 'LB', top: '72%', left: '18%' },
-                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '39%' },
-                { id: 'pos-CB2', pos: 'CB', top: '74%', left: '61%' },
-                { id: 'pos-RB', pos: 'RB', top: '72%', left: '82%' },
-                { id: 'pos-DM1', pos: 'DMF', top: '56%', left: '36%' },
-                { id: 'pos-DM2', pos: 'DMF', top: '56%', left: '64%' },
-                { id: 'pos-AMF', pos: 'AMF', top: '40%', left: '50%' },
-                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '20%' },
-                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
-                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '80%' }
+                { id: 'pos-1', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-2', pos: 'LB', top: '72%', left: '18%' },
+                { id: 'pos-3', pos: 'CB', top: '74%', left: '39%' },
+                { id: 'pos-4', pos: 'CB', top: '74%', left: '61%' },
+                { id: 'pos-5', pos: 'RB', top: '72%', left: '82%' },
+                { id: 'pos-6', pos: 'DMF', top: '56%', left: '36%' },
+                { id: 'pos-7', pos: 'DMF', top: '56%', left: '64%' },
+                { id: 'pos-8', pos: 'AMF', top: '40%', left: '50%' },
+                { id: 'pos-9', pos: 'LWF', top: '22%', left: '20%' },
+                { id: 'pos-10', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-11', pos: 'RWF', top: '22%', left: '80%' }
             ],
             '3-2-2-3': [
-                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
-                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '25%' },
-                { id: 'pos-CB2', pos: 'CB', top: '76%', left: '50%' },
-                { id: 'pos-CB3', pos: 'CB', top: '74%', left: '75%' },
-                { id: 'pos-DM1', pos: 'DMF', top: '56%', left: '38%' },
-                { id: 'pos-DM2', pos: 'DMF', top: '56%', left: '62%' },
-                { id: 'pos-LMF', pos: 'LB', top: '40%', left: '18%' },
-                { id: 'pos-RMF', pos: 'RB', top: '40%', left: '82%' },
-                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '22%' },
-                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
-                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '78%' }
+                { id: 'pos-1', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-2', pos: 'CB', top: '74%', left: '25%' },
+                { id: 'pos-3', pos: 'CB', top: '76%', left: '50%' },
+                { id: 'pos-4', pos: 'CB', top: '74%', left: '75%' },
+                { id: 'pos-5', pos: 'DMF', top: '56%', left: '38%' },
+                { id: 'pos-6', pos: 'DMF', top: '56%', left: '62%' },
+                { id: 'pos-7', pos: 'LB', top: '40%', left: '18%' },
+                { id: 'pos-8', pos: 'RB', top: '40%', left: '82%' },
+                { id: 'pos-9', pos: 'LWF', top: '22%', left: '22%' },
+                { id: 'pos-10', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-11', pos: 'RWF', top: '22%', left: '78%' }
             ]
         };
 
@@ -365,7 +386,6 @@
 
         function openChannel() {
             if (window.Telegram && window.Telegram.WebApp) {
-                // Переход на твой Telegram канал
                 window.Telegram.WebApp.openTelegramLink('https://t.me/masterfoot1'); 
             } else {
                 window.open('https://t.me/masterfoot1', '_blank');
@@ -399,15 +419,18 @@
             showScreen('screen-draft');
         }
 
-        function openPicker(slotId, basePos) {
+        function openPicker(slotId, targetPos) {
             currentSlot = slotId;
 
             const chosenIds = Object.values(squad).map(p => p.id);
             let available = database.filter(p => !chosenIds.includes(p.id));
 
-            let pool = available.filter(p => p.pos === basePos);
+            // Точный фильтр по позиции
+            let pool = available.filter(p => p.pos === targetPos);
+
+            // Резервный выбор, если подходящих позиций осталось меньше 5
             if (pool.length < 5) {
-                let extra = available.filter(p => p.pos !== basePos);
+                let extra = available.filter(p => p.pos !== targetPos);
                 pool = pool.concat(extra);
             }
 
@@ -416,7 +439,7 @@
 
             const container = document.getElementById('card-options');
             container.innerHTML = '';
-            document.getElementById('modal-heading').innerText = "Выбери игрока на " + basePos;
+            document.getElementById('modal-heading').innerText = "Выбери игрока на " + targetPos;
 
             options.forEach(p => {
                 const card = document.createElement('div');
@@ -428,20 +451,20 @@
                     </div>
                     <div class="p-ovr">${p.ovr}</div>
                 `;
-                card.onclick = () => selectPlayer(p, basePos);
+                card.onclick = () => selectPlayer(p, targetPos);
                 container.appendChild(card);
             });
 
             document.getElementById('picker-modal').style.display = 'flex';
         }
 
-        function selectPlayer(player, basePos) {
+        function selectPlayer(player, targetPos) {
             squad[currentSlot] = player;
             
             const slotEl = document.getElementById(currentSlot);
             slotEl.classList.add('filled');
             slotEl.innerHTML = `
-                <div class="slot-pos">${basePos}</div>
+                <div class="slot-pos">${targetPos}</div>
                 <div class="slot-name">${player.name}</div>
                 <div class="slot-ovr">${player.ovr}</div>
             `;
