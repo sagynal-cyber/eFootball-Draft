@@ -88,9 +88,7 @@
             font-weight: bold;
             color: #00ff88;
             cursor: pointer;
-            transition: border-color 0.2s;
         }
-        .form-card:active { border-color: #00ff88; }
 
         .header-stats {
             display: flex;
@@ -202,18 +200,9 @@
             border-radius: 10px;
             border-left: 4px solid #8b949e;
             cursor: pointer;
-            transition: transform 0.1s;
         }
-        .pick-card:active { transform: scale(0.97); }
-        .pick-card.Epic { 
-            border-left-color: #ffd700; 
-            background: linear-gradient(90deg, #423505 0%, #21262d 100%);
-            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.2);
-        }
-        .pick-card.Highlight { 
-            border-left-color: #00ff88; 
-            background: linear-gradient(90deg, #0e2b1b 0%, #21262d 100%);
-        }
+        .pick-card.Epic { border-left-color: #ffd700; background: linear-gradient(90deg, #423505 0%, #21262d 100%); }
+        .pick-card.Highlight { border-left-color: #00ff88; background: linear-gradient(90deg, #0e2b1b 0%, #21262d 100%); }
         .pick-card.Standard { border-left-color: #388bfd; }
 
         .player-meta { text-align: left; }
@@ -233,22 +222,20 @@
             cursor: pointer;
         }
 
-        /* ФИНАЛЬНЫЙ ЭКРАН */
+        /* ФИНАЛЬНЫЙ ЭКРАН И МАТЧ */
         .result-card {
             background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
             border: 2px solid #00ff88;
             border-radius: 20px;
             padding: 20px;
-            margin-top: 15px;
+            margin-top: 10px;
             box-shadow: 0 0 25px rgba(0, 255, 136, 0.25);
         }
         .rank-badge {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
             color: #ffcc00;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 10px 0;
+            margin: 8px 0;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
         .stat-grid {
@@ -259,15 +246,28 @@
         }
         .grid-item {
             background: #21262d;
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             border: 1px solid #30363d;
         }
-        .grid-val { font-size: 22px; font-weight: bold; color: #00ff88; }
-        .grid-lbl { font-size: 11px; color: #8b949e; }
+        .grid-val { font-size: 20px; font-weight: bold; color: #00ff88; }
+        .grid-lbl { font-size: 10px; color: #8b949e; }
 
         .share-btn {
             background: linear-gradient(90deg, #2ea043 0%, #238636 100%);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .match-btn {
+            background: linear-gradient(90deg, #e34c26 0%, #f85149 100%);
             color: #fff;
             border: none;
             padding: 14px;
@@ -277,6 +277,47 @@
             cursor: pointer;
             width: 100%;
             margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(248, 81, 73, 0.3);
+        }
+
+        /* ЭКРАН СИМУЛЯЦИИ */
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #161b22;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid #30363d;
+            margin-bottom: 15px;
+        }
+        .team-box { width: 40%; }
+        .team-title { font-size: 13px; font-weight: bold; }
+        .score-board { font-size: 32px; font-weight: 900; color: #00ff88; width: 20%; }
+        .match-log {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            height: 240px;
+            overflow-y: auto;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .log-item {
+            background: #21262d;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .log-item.opponent { border-left-color: #f85149; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -358,9 +399,30 @@
                 </div>
             </div>
 
+            <button class="match-btn" onclick="startMatchSimulation()">⚔️ Сыграть матч состава</button>
             <button class="share-btn" onclick="shareResult()">🚀 Поделиться результатом</button>
-            <button class="main-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">Собрать новый драфт</button>
+            <button class="reset-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">Собрать новый драфт</button>
         </div>
+    </div>
+
+    <!-- 5. ЭКРАН МАТЧА (СИМУЛЯТОР) -->
+    <div id="screen-match" class="screen">
+        <h3 style="color:#00ff88; margin-bottom: 10px;">МАТЧ В ЛАЙВЕ</h3>
+        <div class="match-header">
+            <div class="team-box">
+                <div class="team-title" style="color:#00ff88;">ТВОЙ СОСТАВ</div>
+                <div id="my-team-ovr-match" style="font-size:11px; color:#8b949e;">OVR 0</div>
+            </div>
+            <div class="score-board"><span id="my-score">0</span>:<span id="opp-score">0</span></div>
+            <div class="team-box">
+                <div class="team-title" id="opp-team-name" style="color:#f85149;">AC MILAN</div>
+                <div id="opp-team-ovr-match" style="font-size:11px; color:#8b949e;">OVR 1050</div>
+            </div>
+        </div>
+
+        <div class="match-log" id="match-log-box"></div>
+
+        <button id="post-match-btn" class="main-btn" style="margin-top:15px; display:none;" onclick="showScreen('screen-result')">Вернуться к результатам</button>
     </div>
 
     <!-- МОДАЛКА ВЫБОРА ИГРОКА -->
@@ -396,49 +458,37 @@
             { id: 12, name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
             { id: 14, name: "F. Cannavaro", ovr: 98, pos: "CB", type: "Epic", club: "Italy" },
-            { id: 15, name: "E. Militao", ovr: 94, pos: "CB", type: "Standard", club: "Real Madrid" },
 
-            // LB
+            // LB/RB
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
-            { id: 22, name: "A. Robertson", ovr: 93, pos: "LB", type: "Standard", club: "Liverpool" },
-
-            // RB
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
-            { id: 32, name: "J. Koundé", ovr: 94, pos: "RB", type: "Highlight", club: "Barcelona" },
 
-            // DMF
+            // DMF/CMF/AMF
             { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
             { id: 51, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
-            { id: 52, name: "Casemiro", ovr: 94, pos: "DMF", type: "Standard", club: "Man Utd" },
-
-            // CMF
             { id: 54, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-            { id: 55, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
             { id: 56, name: "F. Valverde", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-
-            // AMF
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
-            { id: 42, name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
 
-            // LWF
+            // LWF/RWF/CF
             { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
             { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
-            { id: 72, name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
-
-            // RWF
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
             { id: 61, name: "M. Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
-            { id: 62, name: "L. Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
-
-            // CF
             { id: 80, name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
             { id: 81, name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
-            { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
             { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" }
+        ];
+
+        const opponents = [
+            { name: "AC Milan Legends", ovr: 1070 },
+            { name: "Real Madrid All-Time", ovr: 1080 },
+            { name: "Barcelona 2011", ovr: 1065 },
+            { name: "World XI Legends", ovr: 1075 }
         ];
 
         const positionGroups = {
@@ -622,6 +672,88 @@
             document.getElementById('res-highlight-count').innerText = highlightCount;
 
             showScreen('screen-result');
+        }
+
+        function startMatchSimulation() {
+            triggerHaptic('medium');
+            const myOvr = parseInt(document.getElementById('res-total-ovr').innerText);
+            const opp = opponents[Math.floor(Math.random() * opponents.length)];
+
+            document.getElementById('my-team-ovr-match').innerText = `OVR ${myOvr}`;
+            document.getElementById('opp-team-name').innerText = opp.name;
+            document.getElementById('opp-team-ovr-match').innerText = `OVR ${opp.ovr}`;
+            document.getElementById('my-score').innerText = "0";
+            document.getElementById('opp-score').innerText = "0";
+            document.getElementById('post-match-btn').style.display = 'none';
+
+            const logBox = document.getElementById('match-log-box');
+            logBox.innerHTML = '';
+
+            showScreen('screen-match');
+
+            let myScore = 0;
+            let oppScore = 0;
+            const attackers = Object.values(squad).filter(p => ['CF', 'LWF', 'RWF', 'AMF'].includes(p.pos));
+            
+            const events = [
+                { min: "12'", text: "Матч начался! Команды присматриваются друг к другу." },
+                { min: "28'", text: "Опасная атака! Удар проходит рядом со штангой." },
+                { min: "45'", text: "Свисток на перерыв. Равная игра на поле!" },
+                { min: "63'", text: "Мощный дальний удар! Вратарь совершает сейв." },
+                { min: "88'", text: "Финишный штурм! Напряжение на максимуме." }
+            ];
+
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < events.length) {
+                    const item = document.createElement('div');
+                    item.className = 'log-item';
+                    
+                    // Шанс гола зависит от силы команды
+                    const goalChance = Math.random();
+                    if (goalChance > 0.65) {
+                        if (myOvr >= opp.ovr || Math.random() > 0.4) {
+                            myScore++;
+                            document.getElementById('my-score').innerText = myScore;
+                            const scorer = attackers.length > 0 ? attackers[Math.floor(Math.random() * attackers.length)].name : "Форвард";
+                            item.innerText = `${events[step].min} ⚽ ГОООЛ! ${scorer} забивает красивый мяч!`;
+                            triggerHaptic('heavy');
+                        } else {
+                            oppScore++;
+                            document.getElementById('opp-score').innerText = oppScore;
+                            item.className = 'log-item opponent';
+                            item.innerText = `${events[step].min} ⚽ Гол... ${opp.name} выходит вперед.`;
+                            triggerHaptic('light');
+                        }
+                    } else {
+                        item.innerText = `${events[step].min} ${events[step].text}`;
+                    }
+
+                    logBox.appendChild(item);
+                    logBox.scrollTop = logBox.scrollHeight;
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    const finalItem = document.createElement('div');
+                    finalItem.style.fontWeight = 'bold';
+                    finalItem.style.marginTop = '10px';
+                    finalItem.style.color = '#00ff88';
+
+                    if (myScore > oppScore) {
+                        finalItem.innerText = "🏆 ФИНАЛЬНЫЙ СВИСТОК: ПОБЕДА!";
+                        triggerHaptic('success');
+                    } else if (myScore === oppScore) {
+                        finalItem.innerText = "🤝 ФИНАЛЬНЫЙ СВИСТОК: НИЧЬЯ!";
+                    } else {
+                        finalItem.innerText = "❌ ФИНАЛЬНЫЙ СВИСТОК: ПОРАЖЕНИЕ.";
+                        finalItem.style.color = '#f85149';
+                    }
+
+                    logBox.appendChild(finalItem);
+                    logBox.scrollTop = logBox.scrollHeight;
+                    document.getElementById('post-match-btn').style.display = 'block';
+                }
+            }, 1200);
         }
 
         function shareResult() {
