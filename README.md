@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>eFootball Draft Simulator</title>
+    <title>MasterFoot | eFootball Draft</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -12,28 +12,103 @@
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 12px;
             user-select: none;
+            text-align: center;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* БРЕНДИНГ MASTERFOOT */
+        .brand-badge {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .home-card {
+            background: linear-gradient(135deg, #161b22 0%, #1f242d 100%);
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 25px 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .logo { font-size: 48px; margin-bottom: 8px; }
+        .title { font-size: 26px; font-weight: bold; color: #00ff88; margin-bottom: 4px; }
+        .channel-name { font-size: 14px; color: #ffcc00; font-weight: bold; margin-bottom: 12px; }
+        .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 25px; }
+
+        .main-btn {
+            background: linear-gradient(90deg, #00ff88 0%, #00b862 100%);
+            color: #000;
+            border: none;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+        .main-btn:active { transform: scale(0.98); }
+
+        .channel-link-btn {
+            background: #21262d;
+            color: #58a6ff;
+            border: 1px solid #30363d;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            width: 100%;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .formation-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .form-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff88;
+            cursor: pointer;
         }
 
         .header-stats {
             display: flex;
             justify-content: space-around;
             background: #161b22;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border: 1px solid #30363d;
         }
         .stat-box { text-align: center; }
-        .stat-title { font-size: 11px; color: #8b949e; text-transform: uppercase; }
-        .stat-value { font-size: 22px; font-weight: bold; color: #00ff88; }
+        .stat-title { font-size: 10px; color: #8b949e; text-transform: uppercase; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #00ff88; }
 
+        /* ПОЛЕ С ВОДНЫМ ЗНАКОМ MASTERFOOT */
         .pitch {
             background: linear-gradient(180deg, #1e4d2b 0%, #14361e 100%);
             border: 2px solid #2ea043;
             border-radius: 16px;
-            height: 480px;
+            height: 460px;
             position: relative;
             overflow: hidden;
             box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
@@ -44,10 +119,21 @@
             top: 50%; left: 0; right: 0;
             height: 2px; background: rgba(255,255,255,0.2);
         }
+        .pitch-watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.08);
+            letter-spacing: 2px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
         .center-circle {
             position: absolute;
             top: 50%; left: 50%;
-            width: 90px; height: 90px;
+            width: 80px; height: 80px;
             border: 2px solid rgba(255,255,255,0.2);
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -55,8 +141,8 @@
 
         .slot {
             position: absolute;
-            width: 65px;
-            height: 75px;
+            width: 60px;
+            height: 70px;
             background: rgba(22, 27, 34, 0.85);
             border: 2px dashed #00ff88;
             border-radius: 8px;
@@ -66,29 +152,12 @@
             justify-content: center;
             cursor: pointer;
             transform: translate(-50%, -50%);
-            transition: all 0.2s ease;
         }
-        .slot.filled {
-            border-style: solid;
-            background: #1f242d;
-        }
-        .slot-pos { font-size: 11px; font-weight: bold; color: #8b949e; }
-        .slot-add { font-size: 18px; color: #00ff88; margin-top: 2px; }
-        .slot-name { font-size: 10px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; padding: 0 2px; }
-        .slot-ovr { font-size: 12px; font-weight: bold; color: #ffcc00; }
-
-        /* Координаты 4-3-3 */
-        #pos-GK  { top: 88%; left: 50%; }
-        #pos-LB  { top: 72%; left: 18%; }
-        #pos-CB1 { top: 74%; left: 39%; }
-        #pos-CB2 { top: 74%; left: 61%; }
-        #pos-RB  { top: 72%; left: 82%; }
-        #pos-CM1 { top: 50%; left: 28%; }
-        #pos-AMF { top: 45%; left: 50%; }
-        #pos-CM2 { top: 50%; left: 72%; }
-        #pos-LWF { top: 22%; left: 20%; }
-        #pos-CF  { top: 16%; left: 50%; }
-        #pos-RWF { top: 22%; left: 80%; }
+        .slot.filled { border-style: solid; background: #1f242d; }
+        .slot-pos { font-size: 10px; font-weight: bold; color: #8b949e; }
+        .slot-add { font-size: 16px; color: #00ff88; }
+        .slot-name { font-size: 9px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; padding: 0 2px; }
+        .slot-ovr { font-size: 11px; font-weight: bold; color: #ffcc00; }
 
         .modal {
             display: none;
@@ -126,40 +195,76 @@
         .pick-card.Standard { border-left-color: #388bfd; }
 
         .player-meta { text-align: left; }
-        .p-name { font-weight: bold; font-size: 14px; }
-        .p-details { font-size: 11px; color: #8b949e; }
-        .p-ovr { font-size: 18px; font-weight: bold; color: #ffcc00; }
+        .p-name { font-weight: bold; font-size: 13px; }
+        .p-details { font-size: 10px; color: #8b949e; }
+        .p-ovr { font-size: 17px; font-weight: bold; color: #ffcc00; }
+
+        .reset-btn {
+            background: #21262d;
+            color: #f85149;
+            border: 1px solid #30363d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-stats">
-        <div class="stat-box">
-            <div class="stat-title">Team OVR</div>
-            <div id="team-ovr" class="stat-value">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-title">Playstyle</div>
-            <div id="team-style" class="stat-value">70</div>
+    <!-- 1. ЭКРАН: ГЛАВНОЕ МЕНЮ -->
+    <div id="screen-home" class="screen active">
+        <div class="home-card">
+            <div class="brand-badge">OFFICIAL GAME APP</div>
+            <div class="logo">⚽</div>
+            <div class="title">eFootball Draft</div>
+            <div class="channel-name">by MasterFoot</div>
+            <div class="subtitle">Собери свой сильнейший состав!</div>
+            
+            <button class="main-btn" onclick="showScreen('screen-formation')">НАЧАТЬ ДРАФТ</button>
+            <button class="channel-link-btn" onclick="openChannel()">📢 Наш Telegram Канал</button>
         </div>
     </div>
 
-    <div class="pitch">
-        <div class="center-circle"></div>
-
-        <div class="slot" id="pos-GK" onclick="openPicker('GK')"><span class="slot-pos">GK</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-LB" onclick="openPicker('LB')"><span class="slot-pos">LB</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-CB1" onclick="openPicker('CB1')"><span class="slot-pos">CB</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-CB2" onclick="openPicker('CB2')"><span class="slot-pos">CB</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-RB" onclick="openPicker('RB')"><span class="slot-pos">RB</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-CM1" onclick="openPicker('CM1')"><span class="slot-pos">CMF</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-AMF" onclick="openPicker('AMF')"><span class="slot-pos">AMF</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-CM2" onclick="openPicker('CM2')"><span class="slot-pos">CMF</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-LWF" onclick="openPicker('LWF')"><span class="slot-pos">LWF</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-CF" onclick="openPicker('CF')"><span class="slot-pos">CF</span><span class="slot-add">+</span></div>
-        <div class="slot" id="pos-RWF" onclick="openPicker('RWF')"><span class="slot-pos">RWF</span><span class="slot-add">+</span></div>
+    <!-- 2. ЭКРАН: ВЫБОР СХЕМЫ -->
+    <div id="screen-formation" class="screen">
+        <h2 style="color:#00ff88;">Выбери схему</h2>
+        <p class="subtitle">Тактика определит позиции на поле</p>
+        <div class="formation-list">
+            <div class="form-card" onclick="startDraft('4-3-3')">4 - 3 - 3 (Атака)</div>
+            <div class="form-card" onclick="startDraft('4-2-1-3')">4 - 2 - 1 - 3 (Контратака)</div>
+            <div class="form-card" onclick="startDraft('3-2-2-3')">3 - 2 - 2 - 3 (Вингеры)</div>
+        </div>
     </div>
 
+    <!-- 3. ЭКРАН: СБОРКА ДРАФТА -->
+    <div id="screen-draft" class="screen">
+        <div class="header-stats">
+            <div class="stat-box">
+                <div class="stat-title">Схема</div>
+                <div id="selected-formation-name" class="stat-value" style="font-size:16px;">4-3-3</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Team OVR</div>
+                <div id="team-ovr" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Игроков</div>
+                <div id="team-count" class="stat-value">0/11</div>
+            </div>
+        </div>
+
+        <div class="pitch" id="pitch-container">
+            <div class="center-circle"></div>
+            <div class="pitch-watermark">MASTERFOOT</div>
+        </div>
+
+        <button class="reset-btn" onclick="resetDraft()">Заново в меню</button>
+    </div>
+
+    <!-- МОДАЛКА ВЫБОРА ИГРОКА -->
     <div class="modal" id="picker-modal">
         <div class="modal-content">
             <div class="modal-title" id="modal-heading">Выбери игрока</div>
@@ -172,103 +277,140 @@
             window.Telegram.WebApp.expand();
         }
 
-        // Полноценная база данных с ID
         const database = [
-            // Вратари (GK)
             { id: 1, name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
             { id: 2, name: "M. Neuer", ovr: 96, pos: "GK", type: "Highlight", club: "Bayern" },
             { id: 3, name: "G. Donnarumma", ovr: 94, pos: "GK", type: "Standard", club: "PSG" },
             { id: 4, name: "T. Courtois", ovr: 95, pos: "GK", type: "Standard", club: "Real Madrid" },
-            { id: 5, name: "Y. Bounou", ovr: 92, pos: "GK", type: "Standard", club: "Al Hilal" },
-            { id: 6, name: "O. Kahn", ovr: 98, pos: "GK", type: "Epic", club: "Bayern" },
-            { id: 7, name: "E. van der Sar", ovr: 98, pos: "GK", type: "Epic", club: "Man Utd" },
 
-            // Центральные защитники (CB)
             { id: 10, name: "P. Maldini", ovr: 100, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 11, name: "V. van Dijk", ovr: 97, pos: "CB", type: "Highlight", club: "Liverpool" },
             { id: 12, name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
-            { id: 14, name: "Marquinhos", ovr: 93, pos: "CB", type: "Standard", club: "PSG" },
-            { id: 15, name: "R. Araújo", ovr: 94, pos: "CB", type: "Highlight", club: "Barcelona" },
-            { id: 16, name: "F. Cannavaro", ovr: 99, pos: "CB", type: "Epic", club: "Italy" },
-            { id: 17, name: "F. Rijkaard", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
-            { id: 18, name: "E. Militao", ovr: 93, pos: "CB", type: "Standard", club: "Real Madrid" },
 
-            // Левые защитники (LB)
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
-            { id: 22, name: "A. Davies", ovr: 93, pos: "LB", type: "Standard", club: "Bayern" },
-            { id: 23, name: "D. Alaba", ovr: 93, pos: "LB", type: "Standard", club: "Real Madrid" },
-            { id: 24, name: "P. Lahm", ovr: 97, pos: "LB", type: "Epic", club: "Bayern" },
-
-            // Правые защитники (RB)
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
-            { id: 32, name: "K. Walker", ovr: 92, pos: "RB", type: "Standard", club: "Man City" },
-            { id: 33, name: "J. Koundé", ovr: 93, pos: "RB", type: "Highlight", club: "Barcelona" },
-            { id: 34, name: "J. Zanetti", ovr: 98, pos: "RB", type: "Epic", club: "Inter" },
 
-            // Центральные и Атакующие полузащитники (CMF / AMF)
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
             { id: 42, name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
-            { id: 44, name: "Bruno Fernandes", ovr: 94, pos: "AMF", type: "Standard", club: "Man Utd" },
-            { id: 45, name: "Z. Zidane", ovr: 101, pos: "AMF", type: "Epic", club: "Real Madrid" },
-            
-            { id: 50, name: "P. Vieira", ovr: 100, pos: "CMF", type: "Epic", club: "Arsenal" },
+
+            { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
             { id: 51, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
             { id: 52, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
-            { id: 53, name: "F. Valverde", ovr: 95, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-            { id: 54, name: "Rodri", ovr: 96, pos: "CMF", type: "Standard", club: "Man City" },
-            { id: 55, name: "A. Pirlo", ovr: 99, pos: "CMF", type: "Epic", club: "AC Milan" },
-            { id: 56, name: "S. Gerrard", ovr: 97, pos: "CMF", type: "Epic", club: "Liverpool" },
+            { id: 54, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
 
-            // Нападающие (RWF, LWF, CF)
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
             { id: 61, name: "M. Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
-            { id: 62, name: "Lamine Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
-            { id: 63, name: "B. Saka", ovr: 94, pos: "RWF", type: "Standard", club: "Arsenal" },
-            { id: 64, name: "L. Figo", ovr: 97, pos: "RWF", type: "Epic", club: "Real Madrid" },
-
             { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
             { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
-            { id: 72, name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
-            { id: 73, name: "K. Kvaratskhelia", ovr: 93, pos: "LWF", type: "Standard", club: "Napoli" },
-            { id: 74, name: "Neymar Jr", ovr: 98, pos: "LWF", type: "Epic", club: "Santos" },
-
             { id: 80, name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
             { id: 81, name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
-            { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
-            { id: 83, name: "H. Kane", ovr: 96, pos: "CF", type: "Standard", club: "Bayern" },
-            { id: 84, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" },
-            { id: 85, name: "A. Shevchenko", ovr: 98, pos: "CF", type: "Epic", club: "AC Milan" },
-            { id: 86, name: "R. Lewandowski", ovr: 95, pos: "CF", type: "Standard", club: "Barcelona" }
+            { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" }
         ];
 
+        const formations = {
+            '4-3-3': [
+                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-LB', pos: 'LB', top: '72%', left: '18%' },
+                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '39%' },
+                { id: 'pos-CB2', pos: 'CB', top: '74%', left: '61%' },
+                { id: 'pos-RB', pos: 'RB', top: '72%', left: '82%' },
+                { id: 'pos-CM1', pos: 'CMF', top: '50%', left: '28%' },
+                { id: 'pos-AMF', pos: 'AMF', top: '45%', left: '50%' },
+                { id: 'pos-CM2', pos: 'CMF', top: '50%', left: '72%' },
+                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '20%' },
+                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '80%' }
+            ],
+            '4-2-1-3': [
+                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-LB', pos: 'LB', top: '72%', left: '18%' },
+                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '39%' },
+                { id: 'pos-CB2', pos: 'CB', top: '74%', left: '61%' },
+                { id: 'pos-RB', pos: 'RB', top: '72%', left: '82%' },
+                { id: 'pos-DM1', pos: 'DMF', top: '56%', left: '36%' },
+                { id: 'pos-DM2', pos: 'DMF', top: '56%', left: '64%' },
+                { id: 'pos-AMF', pos: 'AMF', top: '40%', left: '50%' },
+                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '20%' },
+                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '80%' }
+            ],
+            '3-2-2-3': [
+                { id: 'pos-GK', pos: 'GK', top: '88%', left: '50%' },
+                { id: 'pos-CB1', pos: 'CB', top: '74%', left: '25%' },
+                { id: 'pos-CB2', pos: 'CB', top: '76%', left: '50%' },
+                { id: 'pos-CB3', pos: 'CB', top: '74%', left: '75%' },
+                { id: 'pos-DM1', pos: 'DMF', top: '56%', left: '38%' },
+                { id: 'pos-DM2', pos: 'DMF', top: '56%', left: '62%' },
+                { id: 'pos-LMF', pos: 'LB', top: '40%', left: '18%' },
+                { id: 'pos-RMF', pos: 'RB', top: '40%', left: '82%' },
+                { id: 'pos-LWF', pos: 'LWF', top: '22%', left: '22%' },
+                { id: 'pos-CF', pos: 'CF', top: '16%', left: '50%' },
+                { id: 'pos-RWF', pos: 'RWF', top: '22%', left: '78%' }
+            ]
+        };
+
+        let currentFormation = '4-3-3';
         let currentSlot = null;
-        let squad = {}; // Выбранные игроки по слотам
+        let squad = {};
 
-        function openPicker(slotId) {
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function openChannel() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // Переход на твой Telegram канал
+                window.Telegram.WebApp.openTelegramLink('https://t.me/masterfoot1'); 
+            } else {
+                window.open('https://t.me/masterfoot1', '_blank');
+            }
+        }
+
+        function startDraft(formationKey) {
+            currentFormation = formationKey;
+            squad = {};
+            document.getElementById('selected-formation-name').innerText = formationKey;
+            document.getElementById('team-ovr').innerText = "0";
+            document.getElementById('team-count').innerText = "0/11";
+
+            const pitch = document.getElementById('pitch-container');
+            pitch.innerHTML = `
+                <div class="center-circle"></div>
+                <div class="pitch-watermark">MASTERFOOT</div>
+            `;
+
+            formations[formationKey].forEach(item => {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.id = item.id;
+                slot.style.top = item.top;
+                slot.style.left = item.left;
+                slot.onclick = () => openPicker(item.id, item.pos);
+                slot.innerHTML = `<span class="slot-pos">${item.pos}</span><span class="slot-add">+</span>`;
+                pitch.appendChild(slot);
+            });
+
+            showScreen('screen-draft');
+        }
+
+        function openPicker(slotId, basePos) {
             currentSlot = slotId;
-            // Очищаем позицию от цифр (CB1 -> CB, CM1 -> CMF)
-            let basePos = slotId.replace(/[0-9]/g, '');
-            if (basePos === "CM") basePos = "CMF";
 
-            // 1. Фильтруем свободных игроков (тех, кого еще НЕТ в составе)
             const chosenIds = Object.values(squad).map(p => p.id);
             let available = database.filter(p => !chosenIds.includes(p.id));
 
-            // 2. Ищем именно по нужной позиции
             let pool = available.filter(p => p.pos === basePos);
-
-            // Если доступных игроков на конкретную позицию меньше 5, добавляем смежных или любых доступных
             if (pool.length < 5) {
                 let extra = available.filter(p => p.pos !== basePos);
                 pool = pool.concat(extra);
             }
 
-            // Перемешиваем и берём 5 случайных
             const shuffled = [...pool].sort(() => 0.5 - Math.random());
             const options = shuffled.slice(0, 5);
 
@@ -286,23 +428,20 @@
                     </div>
                     <div class="p-ovr">${p.ovr}</div>
                 `;
-                card.onclick = () => selectPlayer(p);
+                card.onclick = () => selectPlayer(p, basePos);
                 container.appendChild(card);
             });
 
             document.getElementById('picker-modal').style.display = 'flex';
         }
 
-        function selectPlayer(player) {
+        function selectPlayer(player, basePos) {
             squad[currentSlot] = player;
             
-            const slotEl = document.getElementById(`pos-${currentSlot}`);
+            const slotEl = document.getElementById(currentSlot);
             slotEl.classList.add('filled');
-            
-            // Красиво сокращаем название позиции для слота
-            let displayPos = player.pos;
             slotEl.innerHTML = `
-                <div class="slot-pos">${displayPos}</div>
+                <div class="slot-pos">${basePos}</div>
                 <div class="slot-name">${player.name}</div>
                 <div class="slot-ovr">${player.ovr}</div>
             `;
@@ -313,16 +452,19 @@
 
         function calculateTeamOVR() {
             const players = Object.values(squad);
-            if (players.length === 0) return;
             const total = players.reduce((sum, p) => sum + p.ovr, 0);
             document.getElementById('team-ovr').innerText = total;
-            
+            document.getElementById('team-count').innerText = `${players.length}/11`;
+
             if (players.length === 11) {
-                document.getElementById('team-style').innerText = "100";
                 if(window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 }
             }
+        }
+
+        function resetDraft() {
+            showScreen('screen-home');
         }
     </script>
 </body>
