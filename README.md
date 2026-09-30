@@ -57,6 +57,7 @@
             cursor: pointer;
             width: 100%;
             box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+            transition: transform 0.1s;
         }
         .main-btn:active { transform: scale(0.98); }
 
@@ -87,7 +88,9 @@
             font-weight: bold;
             color: #00ff88;
             cursor: pointer;
+            transition: border-color 0.2s;
         }
+        .form-card:active { border-color: #00ff88; }
 
         .header-stats {
             display: flex;
@@ -150,8 +153,13 @@
             justify-content: center;
             cursor: pointer;
             transform: translate(-50%, -50%);
+            transition: all 0.2s ease;
         }
         .slot.filled { border-style: solid; background: #1f242d; }
+        .slot.filled.Epic { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .slot.filled.Highlight { border-color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+        .slot.filled.Standard { border-color: #388bfd; }
+
         .slot-pos { font-size: 10px; font-weight: bold; color: #8b949e; }
         .slot-add { font-size: 16px; color: #00ff88; }
         .slot-name { font-size: 9px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; padding: 0 2px; }
@@ -174,7 +182,14 @@
             width: 100%;
             max-width: 380px;
             border: 1px solid #30363d;
+            animation: popIn 0.25s ease-out;
         }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         .modal-title { font-size: 16px; text-align: center; margin-bottom: 12px; color: #00ff88; }
         .card-list { display: flex; flex-direction: column; gap: 8px; }
         
@@ -187,9 +202,18 @@
             border-radius: 10px;
             border-left: 4px solid #8b949e;
             cursor: pointer;
+            transition: transform 0.1s;
         }
-        .pick-card.Epic { border-left-color: #d4af37; background: linear-gradient(90deg, #3a2e05 0%, #21262d 100%); }
-        .pick-card.Highlight { border-left-color: #00ff88; background: linear-gradient(90deg, #0e2b1b 0%, #21262d 100%); }
+        .pick-card:active { transform: scale(0.97); }
+        .pick-card.Epic { 
+            border-left-color: #ffd700; 
+            background: linear-gradient(90deg, #423505 0%, #21262d 100%);
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        .pick-card.Highlight { 
+            border-left-color: #00ff88; 
+            background: linear-gradient(90deg, #0e2b1b 0%, #21262d 100%);
+        }
         .pick-card.Standard { border-left-color: #388bfd; }
 
         .player-meta { text-align: left; }
@@ -208,6 +232,52 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        /* ФИНАЛЬНЫЙ ЭКРАН */
+        .result-card {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border: 2px solid #00ff88;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.25);
+        }
+        .rank-badge {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffcc00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .grid-item {
+            background: #21262d;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+        }
+        .grid-val { font-size: 22px; font-weight: bold; color: #00ff88; }
+        .grid-lbl { font-size: 11px; color: #8b949e; }
+
+        .share-btn {
+            background: linear-gradient(90deg, #2ea043 0%, #238636 100%);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -221,7 +291,7 @@
             <div class="channel-name">by MasterFoot</div>
             <div class="subtitle">Собери свой сильнейший состав!</div>
             
-            <button class="main-btn" onclick="showScreen('screen-formation')">НАЧАТЬ ДРАФТ</button>
+            <button class="main-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">НАЧАТЬ ДРАФТ</button>
             <button class="channel-link-btn" onclick="openChannel()">📢 Наш Telegram Канал</button>
         </div>
     </div>
@@ -259,7 +329,38 @@
             <div class="pitch-watermark">MASTERFOOT</div>
         </div>
 
-        <button class="reset-btn" onclick="resetDraft()">Заново в меню</button>
+        <button class="reset-btn" onclick="triggerHaptic('light'); resetDraft()">Заново в меню</button>
+    </div>
+
+    <!-- 4. ЭКРАН ФИНАЛА (РЕЗУЛЬТАТЫ) -->
+    <div id="screen-result" class="screen">
+        <div class="result-card">
+            <div class="brand-badge">DRAFT COMPLETED</div>
+            <div class="subtitle" style="margin-bottom:5px;">Ранг твоего состава:</div>
+            <div class="rank-badge" id="squad-rank">S-TIER</div>
+
+            <div class="stat-grid">
+                <div class="grid-item">
+                    <div class="grid-val" id="res-total-ovr">0</div>
+                    <div class="grid-lbl">Общая сила</div>
+                </div>
+                <div class="grid-item">
+                    <div class="grid-val" id="res-avg-ovr">0</div>
+                    <div class="grid-lbl">Средний OVR</div>
+                </div>
+                <div class="grid-item">
+                    <div class="grid-val" id="res-epic-count">0</div>
+                    <div class="grid-lbl">Epic карт</div>
+                </div>
+                <div class="grid-item">
+                    <div class="grid-val" id="res-highlight-count">0</div>
+                    <div class="grid-lbl">Highlight карт</div>
+                </div>
+            </div>
+
+            <button class="share-btn" onclick="shareResult()">🚀 Поделиться результатом</button>
+            <button class="main-btn" onclick="triggerHaptic('medium'); showScreen('screen-formation')">Собрать новый драфт</button>
+        </div>
     </div>
 
     <!-- МОДАЛКА ВЫБОРА ИГРОКА -->
@@ -271,11 +372,16 @@
     </div>
 
     <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.expand();
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) { tg.expand(); }
+
+        function triggerHaptic(type = 'light') {
+            if (tg && tg.HapticFeedback) {
+                if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+                else tg.HapticFeedback.impactOccurred(type);
+            }
         }
 
-        // БАЗА ДАННЫХ
         const database = [
             // GK
             { id: 1, name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
@@ -291,72 +397,61 @@
             { id: 13, name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
             { id: 14, name: "F. Cannavaro", ovr: 98, pos: "CB", type: "Epic", club: "Italy" },
             { id: 15, name: "E. Militao", ovr: 94, pos: "CB", type: "Standard", club: "Real Madrid" },
-            { id: 16, name: "A. Rüdiger", ovr: 95, pos: "CB", type: "Highlight", club: "Real Madrid" },
 
             // LB
             { id: 20, name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
             { id: 21, name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
             { id: 22, name: "A. Robertson", ovr: 93, pos: "LB", type: "Standard", club: "Liverpool" },
-            { id: 23, name: "A. Davies", ovr: 95, pos: "LB", type: "Highlight", club: "Bayern" },
 
             // RB
             { id: 30, name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
             { id: 31, name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
             { id: 32, name: "J. Koundé", ovr: 94, pos: "RB", type: "Highlight", club: "Barcelona" },
-            { id: 33, name: "Trent A-A", ovr: 95, pos: "RB", type: "Highlight", club: "Liverpool" },
 
             // DMF
             { id: 50, name: "P. Vieira", ovr: 100, pos: "DMF", type: "Epic", club: "Arsenal" },
             { id: 51, name: "Rodri", ovr: 96, pos: "DMF", type: "Standard", club: "Man City" },
             { id: 52, name: "Casemiro", ovr: 94, pos: "DMF", type: "Standard", club: "Man Utd" },
-            { id: 53, name: "F. Rijkaard", ovr: 98, pos: "DMF", type: "Epic", club: "AC Milan" },
 
             // CMF
             { id: 54, name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
             { id: 55, name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
             { id: 56, name: "F. Valverde", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
-            { id: 57, name: "Xavi", ovr: 97, pos: "CMF", type: "Epic", club: "Barcelona" },
-            { id: 58, name: "Iniesta", ovr: 98, pos: "CMF", type: "Epic", club: "Barcelona" },
 
             // AMF
             { id: 40, name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
             { id: 41, name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
             { id: 42, name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
             { id: 43, name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
-            { id: 44, name: "D. Maradona", ovr: 101, pos: "AMF", type: "Epic", club: "Argentina" },
 
             // LWF
             { id: 70, name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
             { id: 71, name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
             { id: 72, name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
-            { id: 73, name: "Neymar Jr", ovr: 99, pos: "LWF", type: "Epic", club: "Santos" },
 
             // RWF
             { id: 60, name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
             { id: 61, name: "M. Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
             { id: 62, name: "L. Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
-            { id: 63, name: "L. Figo", ovr: 97, pos: "RWF", type: "Epic", club: "Real Madrid" },
 
             // CF
             { id: 80, name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
             { id: 81, name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
             { id: 82, name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
-            { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" },
-            { id: 84, name: "R. Lewandowski", ovr: 96, pos: "CF", type: "Standard", club: "Barcelona" }
+            { id: 83, name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" }
         ];
 
-        // КАРТА РОДСТВЕННЫХ ПОЗИЦИЙ (ЕСЛИ ТОЧНЫЕ ИГРОКИ ЗАКОНЧИЛИСЬ)
         const positionGroups = {
             'GK': ['GK'],
             'CB': ['CB', 'LB', 'RB'],
-            'LB': ['LB', 'CB', 'LMF'],
-            'RB': ['RB', 'CB', 'RMF'],
+            'LB': ['LB', 'CB'],
+            'RB': ['RB', 'CB'],
             'DMF': ['DMF', 'CMF'],
             'CMF': ['CMF', 'DMF', 'AMF'],
-            'AMF': ['AMF', 'CMF', 'SS'],
-            'LWF': ['LWF', 'RWF', 'CF', 'LMF'],
-            'RWF': ['RWF', 'LWF', 'CF', 'RMF'],
-            'CF': ['CF', 'SS', 'LWF', 'RWF']
+            'AMF': ['AMF', 'CMF'],
+            'LWF': ['LWF', 'RWF', 'CF'],
+            'RWF': ['RWF', 'LWF', 'CF'],
+            'CF': ['CF', 'LWF', 'RWF']
         };
 
         const formations = {
@@ -411,14 +506,13 @@
         }
 
         function openChannel() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openTelegramLink('https://t.me/masterfoot1'); 
-            } else {
-                window.open('https://t.me/masterfoot1', '_blank');
-            }
+            triggerHaptic('light');
+            if (tg) { tg.openTelegramLink('https://t.me/masterfoot1'); } 
+            else { window.open('https://t.me/masterfoot1', '_blank'); }
         }
 
         function startDraft(formationKey) {
+            triggerHaptic('medium');
             currentFormation = formationKey;
             squad = {};
             document.getElementById('selected-formation-name').innerText = formationKey;
@@ -446,15 +540,13 @@
         }
 
         function openPicker(slotId, targetPos) {
+            triggerHaptic('light');
             currentSlot = slotId;
 
             const chosenIds = Object.values(squad).map(p => p.id);
             let available = database.filter(p => !chosenIds.includes(p.id));
 
-            // 1. Пытаемся найти ровно по нужной позиции
             let pool = available.filter(p => p.pos === targetPos);
-
-            // 2. Если мало, подключаем родственные позиции (защитники к защитникам, хавы к хавам)
             if (pool.length < 5) {
                 const allowedPositions = positionGroups[targetPos] || [targetPos];
                 pool = available.filter(p => allowedPositions.includes(p.pos));
@@ -485,10 +577,11 @@
         }
 
         function selectPlayer(player, targetPos) {
+            triggerHaptic(player.type === 'Epic' ? 'heavy' : 'medium');
             squad[currentSlot] = player;
             
             const slotEl = document.getElementById(currentSlot);
-            slotEl.classList.add('filled');
+            slotEl.className = `slot filled ${player.type}`;
             slotEl.innerHTML = `
                 <div class="slot-pos">${targetPos}</div>
                 <div class="slot-name">${player.name}</div>
@@ -506,10 +599,41 @@
             document.getElementById('team-count').innerText = `${players.length}/11`;
 
             if (players.length === 11) {
-                if(window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                }
+                setTimeout(() => finishDraft(total, players), 500);
             }
+        }
+
+        function finishDraft(totalOvr, players) {
+            triggerHaptic('success');
+
+            const avgOvr = (totalOvr / 11).toFixed(1);
+            const epicCount = players.filter(p => p.type === 'Epic').length;
+            const highlightCount = players.filter(p => p.type === 'Highlight').length;
+
+            let rank = "B-TIER";
+            if (totalOvr >= 1080) rank = "S+ LEGENDARY";
+            else if (totalOvr >= 1060) rank = "S-TIER WORLD CLASS";
+            else if (totalOvr >= 1030) rank = "A-TIER PRO";
+
+            document.getElementById('squad-rank').innerText = rank;
+            document.getElementById('res-total-ovr').innerText = totalOvr;
+            document.getElementById('res-avg-ovr').innerText = avgOvr;
+            document.getElementById('res-epic-count').innerText = epicCount;
+            document.getElementById('res-highlight-count').innerText = highlightCount;
+
+            showScreen('screen-result');
+        }
+
+        function shareResult() {
+            triggerHaptic('light');
+            const totalOvr = document.getElementById('res-total-ovr').innerText;
+            const rank = document.getElementById('squad-rank').innerText;
+            const shareText = `⚽ Мой результат в eFootball Draft от MasterFoot:\n🔥 Общая сила: ${totalOvr}\n🏆 Ранг: ${rank}\n\nСобери свой состав здесь! 👇`;
+            
+            const shareUrl = `https://t.me/share/url?url=https://t.me/masterfoot1&text=${encodeURIComponent(shareText)}`;
+            
+            if (tg) { tg.openTelegramLink(shareUrl); }
+            else { window.open(shareUrl, '_blank'); }
         }
 
         function resetDraft() {
