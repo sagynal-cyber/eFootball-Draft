@@ -4,80 +4,308 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>eFootball Draft Simulator</title>
-    <!-- Подключаем Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
-            background-color: #121212;
+            background-color: #0d1117;
             color: #ffffff;
-            font-family: Arial, sans-serif;
-            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            user-select: none;
         }
-        .card-container {
-            border: 2px solid #00ff88;
+
+        /* Шапка с рейтингом */
+        .header-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #161b22;
+            padding: 12px;
             border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-            background-color: #1e1e1e;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            margin-bottom: 12px;
+            border: 1px solid #30363d;
         }
-        .btn {
-            background-color: #00ff88;
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
+        .stat-box { text-align: center; }
+        .stat-title { font-size: 11px; color: #8b949e; text-transform: uppercase; }
+        .stat-value { font-size: 22px; font-weight: bold; color: #00ff88; }
+
+        /* Футбольное поле */
+        .pitch {
+            background: linear-gradient(180deg, #1e4d2b 0%, #14361e 100%);
+            border: 2px solid #2ea043;
+            border-radius: 16px;
+            height: 480px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+        }
+        /* Разметка поля */
+        .pitch::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            height: 2px; background: rgba(255,255,255,0.2);
+        }
+        .center-circle {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 90px; height: 90px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Сетка игроков на поле */
+        .slot {
+            position: absolute;
+            width: 65px;
+            height: 75px;
+            background: rgba(22, 27, 34, 0.85);
+            border: 2px dashed #00ff88;
             border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            margin-top: 20px;
+            transform: translate(-50%, -50%);
+            transition: all 0.2s ease;
+        }
+        .slot.filled {
+            border-style: solid;
+            background: #1f242d;
+        }
+        .slot-pos { font-size: 11px; font-weight: bold; color: #8b949e; }
+        .slot-add { font-size: 18px; color: #00ff88; margin-top: 2px; }
+        .slot-name { font-size: 10px; font-weight: bold; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; padding: 0 2px; }
+        .slot-ovr { font-size: 12px; font-weight: bold; color: #ffcc00; }
+
+        /* Координаты позиций (Схема 4-3-3) */
+        #pos-GK  { top: 88%; left: 50%; }
+        #pos-LB  { top: 72%; left: 18%; }
+        #pos-CB1 { top: 74%; left: 39%; }
+        #pos-CB2 { top: 74%; left: 61%; }
+        #pos-RB  { top: 72%; left: 82%; }
+        #pos-CM1 { top: 50%; left: 28%; }
+        #pos-AMF { top: 45%; left: 50%; }
+        #pos-CM2 { top: 50%; left: 72%; }
+        #pos-LWF { top: 22%; left: 20%; }
+        #pos-CF  { top: 16%; left: 50%; }
+        #pos-RWF { top: 22%; left: 80%; }
+
+        /* Окно выбора (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        .modal-content {
+            background: #161b22;
+            border-radius: 16px;
+            padding: 15px;
             width: 100%;
+            max-width: 380px;
+            border: 1px solid #30363d;
         }
-        .rating {
-            font-size: 24px;
-            color: #ffcc00;
-            font-weight: bold;
+        .modal-title { font-size: 16px; text-align: center; margin-bottom: 12px; color: #00ff88; }
+        .card-list { display: flex; flex-direction: column; gap: 8px; }
+        
+        .pick-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #21262d;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border-left: 4px solid #8b949e;
+            cursor: pointer;
         }
+        .pick-card.Epic { border-left-color: #ff0055; background: linear-gradient(90deg, #2b111e 0%, #21262d 100%); }
+        .pick-card.Highlight { border-left-color: #00ff88; background: linear-gradient(90deg, #0e2b1b 0%, #21262d 100%); }
+        .pick-card.Standard { border-left-color: #388bfd; }
+
+        .player-meta { text-align: left; }
+        .p-name { font-weight: bold; font-size: 14px; }
+        .p-details { font-size: 11px; color: #8b949e; }
+        .p-ovr { font-size: 18px; font-weight: bold; color: #ffcc00; }
     </style>
 </head>
 <body>
 
-    <h2>⚽ eFootball Draft</h2>
-    
-    <div class="card-container">
-        <h3 id="player-name">Нажми кнопку ниже!</h3>
-        <div id="player-rating" class="rating"></div>
-        <p id="player-info">Выбери своего первого игрока</p>
+    <!-- Шапка статистики -->
+    <div class="header-stats">
+        <div class="stat-box">
+            <div class="stat-title">Team OVR</div>
+            <div id="team-ovr" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-title">Playstyle</div>
+            <div id="team-style" class="stat-value">70</div>
+        </div>
     </div>
 
-    <button class="btn" onclick="getRandomPlayer()">Получить игрока</button>
+    <!-- Поле -->
+    <div class="pitch">
+        <div class="center-circle"></div>
+
+        <!-- 11 Позиций -->
+        <div class="slot" id="pos-GK" onclick="openPicker('GK')"><span class="slot-pos">GK</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-LB" onclick="openPicker('LB')"><span class="slot-pos">LB</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-CB1" onclick="openPicker('CB1')"><span class="slot-pos">CB</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-CB2" onclick="openPicker('CB2')"><span class="slot-pos">CB</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-RB" onclick="openPicker('RB')"><span class="slot-pos">RB</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-CM1" onclick="openPicker('CM1')"><span class="slot-pos">CMF</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-AMF" onclick="openPicker('AMF')"><span class="slot-pos">AMF</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-CM2" onclick="openPicker('CM2')"><span class="slot-pos">CMF</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-LWF" onclick="openPicker('LWF')"><span class="slot-pos">LWF</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-CF" onclick="openPicker('CF')"><span class="slot-pos">CF</span><span class="slot-add">+</span></div>
+        <div class="slot" id="pos-RWF" onclick="openPicker('RWF')"><span class="slot-pos">RWF</span><span class="slot-add">+</span></div>
+    </div>
+
+    <!-- Модальное окно выбора из 5 карт -->
+    <div class="modal" id="picker-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-heading">Выбери игрока</div>
+            <div class="card-list" id="card-options"></div>
+        </div>
+    </div>
 
     <script>
-        // Инициализация Telegram SDK
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.expand();
         }
 
-        // База данных для первого теста
-        const players = [
-            { name: "L. Messi", rating: 99, position: "RW", type: "Epic" },
-            { name: "C. Ronaldo", rating: 98, position: "CF", type: "Highlight" },
-            { name: "K. De Bruyne", rating: 96, position: "AMF", type: "Standard" },
-            { name: "V. van Dijk", rating: 95, position: "CB", type: "Highlight" },
-            { name: "Neymar Jr", rating: 97, position: "LWF", type: "Show Time" },
-            { name: "K. Mbappé", rating: 98, position: "CF", type: "Highlight" }
+        // Расширенная база данных
+        const database = [
+            // Вратари
+            { name: "P. Schmeichel", ovr: 99, pos: "GK", type: "Epic", club: "Man Utd" },
+            { name: "M. Neuer", ovr: 96, pos: "GK", type: "Highlight", club: "Bayern" },
+            { name: "G. Donnarumma", ovr: 94, pos: "GK", type: "Standard", club: "PSG" },
+            { name: "Thibaut Courtois", ovr: 95, pos: "GK", type: "Standard", club: "Real Madrid" },
+            { name: "Yassine Bounou", ovr: 92, pos: "GK", type: "Standard", club: "Al Hilal" },
+
+            // Защитники
+            { name: "P. Maldini", ovr: 100, pos: "CB", type: "Epic", club: "AC Milan" },
+            { name: "V. van Dijk", ovr: 97, pos: "CB", type: "Highlight", club: "Liverpool" },
+            { name: "A. Nesta", ovr: 98, pos: "CB", type: "Epic", club: "AC Milan" },
+            { name: "Rúben Dias", ovr: 95, pos: "CB", type: "Standard", club: "Man City" },
+            { name: "Marquinhos", ovr: 93, pos: "CB", type: "Standard", club: "PSG" },
+            { name: "R. Araújo", ovr: 94, pos: "CB", type: "Highlight", club: "Barcelona" },
+
+            { name: "Roberto Carlos", ovr: 98, pos: "LB", type: "Epic", club: "Real Madrid" },
+            { name: "T. Hernandez", ovr: 94, pos: "LB", type: "Highlight", club: "AC Milan" },
+            { name: "A. Davies", ovr: 93, pos: "LB", type: "Standard", club: "Bayern" },
+
+            { name: "Cafu", ovr: 97, pos: "RB", type: "Epic", club: "AC Milan" },
+            { name: "A. Hakimi", ovr: 94, pos: "RB", type: "Highlight", club: "PSG" },
+            { name: "K. Walker", ovr: 92, pos: "RB", type: "Standard", club: "Man City" },
+
+            // Полузащитники
+            { name: "Ruud Gullit", ovr: 101, pos: "AMF", type: "Epic", club: "AC Milan" },
+            { name: "K. De Bruyne", ovr: 97, pos: "AMF", type: "Highlight", club: "Man City" },
+            { name: "J. Bellingham", ovr: 98, pos: "AMF", type: "Highlight", club: "Real Madrid" },
+            { name: "Kaká", ovr: 99, pos: "AMF", type: "Epic", club: "AC Milan" },
+            { name: "Bruno Fernandes", ovr: 94, pos: "AMF", type: "Standard", club: "Man Utd" },
+
+            { name: "P. Vieira", ovr: 100, pos: "CMF", type: "Epic", club: "Arsenal" },
+            { name: "L. Modrić", ovr: 96, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            { name: "Pedri", ovr: 94, pos: "CMF", type: "Standard", club: "Barcelona" },
+            { name: "F. Valverde", ovr: 95, pos: "CMF", type: "Highlight", club: "Real Madrid" },
+            { name: "Rodri", ovr: 96, pos: "CMF", type: "Standard", club: "Man City" },
+
+            // Нападающие
+            { name: "L. Messi", ovr: 102, pos: "RWF", type: "Epic", club: "Inter Miami" },
+            { name: "Mohamed Salah", ovr: 96, pos: "RWF", type: "Highlight", club: "Liverpool" },
+            { name: "Lamine Yamal", ovr: 95, pos: "RWF", type: "Highlight", club: "Barcelona" },
+            { name: "B. Saka", ovr: 94, pos: "RWF", type: "Standard", club: "Arsenal" },
+
+            { name: "Ronaldinho", ovr: 100, pos: "LWF", type: "Epic", club: "Barcelona" },
+            { name: "Vini Jr.", ovr: 97, pos: "LWF", type: "Highlight", club: "Real Madrid" },
+            { name: "K. Mbappé", ovr: 98, pos: "LWF", type: "Highlight", club: "Real Madrid" },
+            { name: "Khvicha Kvaratskhelia", ovr: 93, pos: "LWF", type: "Standard", club: "Napoli" },
+
+            { name: "Ronaldo Nazário", ovr: 101, pos: "CF", type: "Epic", club: "Inter" },
+            { name: "C. Ronaldo", ovr: 98, pos: "CF", type: "Epic", club: "Al Nassr" },
+            { name: "E. Haaland", ovr: 97, pos: "CF", type: "Highlight", club: "Man City" },
+            { name: "H. Kane", ovr: 96, pos: "CF", type: "Standard", club: "Bayern" },
+            { name: "M. van Basten", ovr: 99, pos: "CF", type: "Epic", club: "AC Milan" }
         ];
 
-        function getRandomPlayer() {
-            const randomIndex = Math.floor(Math.random() * players.length);
-            const player = players[randomIndex];
+        let currentSlot = null;
+        let squad = {};
+
+        function openPicker(slotId) {
+            currentSlot = slotId;
+            const posType = slotId.replace(/[0-9]/g, ''); // Получаем чистую позицию (например, CB1 -> CB)
             
-            document.getElementById('player-name').innerText = player.name;
-            document.getElementById('player-rating').innerText = "★ " + player.rating;
-            document.getElementById('player-info').innerText = "Позиция: " + player.position + " | Тип: " + player.type;
+            // Фильтруем игроков по позициям
+            let pool = database.filter(p => p.pos === posType);
+            if(pool.length < 5) pool = database; // Заглушка, если мало карт
+
+            // Перемешиваем и выбираем 5 случайных
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            const options = shuffled.slice(0, 5);
+
+            // Рендерим модалку
+            const container = document.getElementById('card-options');
+            container.innerHTML = '';
+            document.getElementById('modal-heading').innerText = "Выбери игрока на " + posType;
+
+            options.forEach(p => {
+                const card = document.createElement('div');
+                card.className = `pick-card ${p.type}`;
+                card.innerHTML = `
+                    <div class="player-meta">
+                        <div class="p-name">${p.name}</div>
+                        <div class="p-details">${p.pos} | ${p.club} • ${p.type}</div>
+                    </div>
+                    <div class="p-ovr">${p.ovr}</div>
+                `;
+                card.onclick = () => selectPlayer(p);
+                container.appendChild(card);
+            });
+
+            document.getElementById('picker-modal').style.display = 'flex';
+        }
+
+        function selectPlayer(player) {
+            squad[currentSlot] = player;
+            
+            // Обновляем визуальный слот на поле
+            const slotEl = document.getElementById(`pos-${currentSlot}`);
+            slotEl.classList.add('filled');
+            slotEl.innerHTML = `
+                <div class="slot-pos">${player.pos}</div>
+                <div class="slot-name">${player.name}</div>
+                <div class="slot-ovr">${player.ovr}</div>
+            `;
+
+            document.getElementById('picker-modal').style.display = 'none';
+            calculateTeamOVR();
+        }
+
+        function calculateTeamOVR() {
+            const players = Object.values(squad);
+            if (players.length === 0) return;
+            const total = players.reduce((sum, p) => sum + p.ovr, 0);
+            const avg = Math.round(total / players.length);
+            document.getElementById('team-ovr').innerText = total;
+            
+            if (players.length === 11) {
+                document.getElementById('team-style').innerText = "100";
+                if(window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+            }
         }
     </script>
+</body>
+</html>
 </body>
 </html>
